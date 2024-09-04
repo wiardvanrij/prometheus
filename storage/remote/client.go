@@ -178,10 +178,13 @@ func NewReadClient(name string, conf *ClientConfig) (ReadClient, error) {
 
 // NewWriteClient creates a new client for remote write.
 func NewWriteClient(name string, conf *ClientConfig) (WriteClient, error) {
-	httpClient, err := config_util.NewClientFromConfig(conf.HTTPClientConfig, "remote_storage_write_client")
+
+	opts := config_util.WithKeepAlivesDisabled()
+	httpClient, err := config_util.NewClientFromConfig(conf.HTTPClientConfig, "remote_storage_write_client", opts)
 	if err != nil {
 		return nil, err
 	}
+
 	t := httpClient.Transport
 
 	if len(conf.Headers) > 0 {
@@ -215,6 +218,7 @@ func NewWriteClient(name string, conf *ClientConfig) (WriteClient, error) {
 	}
 
 	httpClient.Transport = otelhttp.NewTransport(t)
+
 	return &Client{
 		remoteName:       name,
 		urlString:        conf.URL.String(),
